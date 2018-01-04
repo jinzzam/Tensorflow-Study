@@ -74,24 +74,26 @@ train_labels = labels[0:int(0.8 * len(labels))]
 test_features = features[int(0.8 * len(features)):]
 test_labels = labels[int(0.8 * len(labels)):]
 
-def train_data_iterator():
+def train_data_iterator():      # generator?
     batch_idx = 0
     while True:
+        # 매 시대마다 새로 shuffling 한다
         idxs = np.arange(0, len(train_features))
-        np.random.shuffle(idxs)
+        # np.arange(A, B) : 배열에 A이상 B미만 까지의 숫자를 순서대로 저장해줌
+        np.random.shuffle(idxs)     # 인덱스 자체를 셔플
         shuf_features = train_features[idxs]
         shuf_labels = train_labels[idxs]
 
-        batch_size = BATCH_SIZE
+        batch_size = BATCH_SIZE     # 50
 
         for batch_idx in range(0, len(train_features), batch_size):     # array slicing
-            images_batch = shuf_features[batch_idx:batch_idx + batch_size] / 255.
+            images_batch = shuf_features[batch_idx:batch_idx + batch_size] / 255.   # 255로 나누어서 0에서 1사이의 실수로 정규화한다
             labels_batch = shuf_labels[batch_idx:batch_idx + batch_size]
             yield images_batch, labels_batch
 
-iter_ = train_data_iterator()
+iter_ = train_data_iterator()       # generator를 호출하면 iterator를 반환한다
 for step in range(100):
     # get a batch of data
-    images_batch_val, labels_batch_val = next(iter_)
+    images_batch_val, labels_batch_val = next(iter_)       # iterator에 대해서 next함수를 실행할 때마다 하나의 배치가 반환된다
     print(images_batch_val)
     print(labels_batch_val)
