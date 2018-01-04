@@ -43,7 +43,6 @@ def plot_images(image) :
         ax.set_xlabel(xlabel)   # x축 제목?
         ax.set_xticks([])  # Remove ticks from the plot.    # x축 눈금 변경 (공백 -> remove)
         ax.set_yticks([])                                   # y축 눈금 변경 (공백 -> remove)
+    plt.show()
 
-     plt.show()
-
-plot_images(img)
+#plot_images(img)
