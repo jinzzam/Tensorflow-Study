@@ -11,14 +11,14 @@ def is_prime(number):
             return False
     return True
 
-def get_primes(number):     # yield를 만날 때 까지 반복  : break 와 비슷
+def get_primes(number):         # 매개변수 number보다 크거나 같은 모든 소수를 순서대로 생성해주는 generator
     while True:
-        if is_prime(number):
-            yield number    # yield를 만나고 그 후 number 값은 freeze
+        if is_prime(number):    # yield를 만날 때 까지 반복  : break 와 비슷
+            yield number        # yield를 만나고 그 후 number 값은 freeze
         number += 1
 
 prime_iterator = get_primes(1)      # iterator : 반복하다
 
-for _ in range(100) :       # 100번 반복해서 돌아라
+for _ in range(100):       # 100번 반복해서 돌아라
     next_prime_number = next(prime_iterator)    # next를 호출하는 순간 get_primes 함수가 호출되어 실행됨
     print(next_prime_number)
