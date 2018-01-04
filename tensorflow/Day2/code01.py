@@ -1,5 +1,3 @@
-import numpy as np
-import os
 import cv2
 from matplotlib import pyplot as plt
 
@@ -22,9 +20,12 @@ cv2.destroyAllWindows()     # 창 종료
 
 img = cv2.resize(img, (200, 200), interpolation=cv2.INTER_CUBIC)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+# opencv는 기본적으로 이미지파일을 BGR로 저장함
+# 그래서 저장하기 전에 RGB로 바꿔줌
 
 cv2.imwrite('converted.jpg', img)
 
+# matplotlib를 이용한 파일 보기
 plt.imshow(img)
 plt.show()
 
@@ -35,14 +36,14 @@ def plot_images(image) :
     for i, ax in enumerate(axes.flat) :
         row = i // 4        # 몫을 구하는 연산 //
         col = i % 4
-        image_frag = image[row*50:(row+1)*50, col*50:(col+1)*50, :] # 세로, 가로, 처음부터끝까지(z축)  그래서 가로세로 4등분
+        image_frag = image[row*50:(row+1)*50, col*50:(col+1)*50, :]  # 세로, 가로, 처음부터끝까지(z축)  그래서 가로세로 4등분
         ax.imshow(image_frag)
 
         xlabel = '{},{}'.format(row, col)
-        ax.set_xlabel(xlabel)
-        ax.set_xticks([])  # Remove ticks from the plot.
-        ax.set_yticks([])
+        ax.set_xlabel(xlabel)   # x축 제목?
+        ax.set_xticks([])  # Remove ticks from the plot.    # x축 눈금 변경 (공백 -> remove)
+        ax.set_yticks([])                                   # y축 눈금 변경 (공백 -> remove)
 
-    plt.show()
+     plt.show()
 
 plot_images(img)
