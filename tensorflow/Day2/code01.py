@@ -29,8 +29,8 @@ cv2.imwrite('converted.jpg', img)
 plt.imshow(img)
 plt.show()
 
-def plot_images(image) :
-    fig, axes = plt.subplot(4, 4)
+def plot_images(image):
+    fig, axes = plt.subplots(4, 4)
     fig.subplots_adjust(hspace = 0.3, wspace = 0.3)
 
     for i, ax in enumerate(axes.flat) :
@@ -45,4 +45,4 @@ def plot_images(image) :
         ax.set_yticks([])                                   # y축 눈금 변경 (공백 -> remove)
     plt.show()
 
-#plot_images(img)
+plot_images(img)
