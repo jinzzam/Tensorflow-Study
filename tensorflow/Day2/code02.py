@@ -1,6 +1,6 @@
-import  numpy as np
-import  os
-import  cv2
+import numpy as np
+import os
+import cv2
 import glob
 
 IMG_HEIGHT = 60
@@ -8,7 +8,7 @@ IMG_WIDTH = 60
 NUM_CHANNEL = 3
 NUM_CLASS = 5
 
-def load_image(addr) :
+def load_image(addr):
     img = cv2.imread(addr)
     img = cv2.resize(img, (IMG_HEIGHT, IMG_WIDTH), interpolation=cv2.INTER_CUBIC)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -36,4 +36,5 @@ for dir_name in image_dir_list:
 
     class_index += 1
 
-print(len(features))        #python list
+print(len(features))        #python list  500이 나와야함  총 파일 개수가 500개
+
