@@ -31,7 +31,7 @@ labels = []         # 정답 (분류)
 for dir_name in image_dir_list:
     image_file_list = os.listdir(IMAGE_DIR_BASE + os.sep + dir_name)    # 경로명 + / + 파일이름
     for file_name in image_file_list:
-        image = load_image(IMAGE_DIR_BASE + os.sep + file_name)
+        image = load_image(IMAGE_DIR_BASE + os.sep + dir_name + os.sep + file_name)
 
         features.append(image.ravel())      # ravel()은 다차원배열을 1차원 배열로 반환함  numpy array가 제공해주는 함수임
         labels.append(class_index)          # append는 python리스트에 새로운 값을 추가함
@@ -73,7 +73,7 @@ test_labels = labels[int(0.8 * len(labels)):]
 def train_data_iterator():
     batch_idx = 0
     while True:
-        idxs = np.arrange(0, len(train_features))
+        idxs = np.arange(0, len(train_features))
         np.random.shuffle(idxs)
         shuf_features = train_features[idxs]
         shuf_labels = train_labels[idxs]
