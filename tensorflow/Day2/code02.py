@@ -8,6 +8,7 @@ IMG_HEIGHT = 60
 IMG_WIDTH = 60
 NUM_CHANNEL = 3
 NUM_CLASS = 5
+BATCH_SIZE = 50
 
 def load_image(addr):
     img = cv2.imread(addr)
@@ -69,3 +70,24 @@ train_labels = labels[0:int(0.8 * len(labels))]
 test_features = features[int(0.8 * len(features)):]
 test_labels = labels[int(0.8 * len(labels)):]
 
+def train_data_iterator():
+    batch_idx = 0
+    while True:
+        idxs = np.arrange(0, len(train_features))
+        np.random.shuffle(idxs)
+        shuf_features = train_features[idxs]
+        shuf_labels = train_labels[idxs]
+
+        batch_size = BATCH_SIZE
+
+        for batch_idx in range(0, len(train_features), batch_size):     # array slicing
+            images_batch = shuf_features[batch_idx:batch_idx + batch_size] / 255.
+            labels_batch = shuf_labels[batch_idx:batch_idx + batch_size]
+            yield images_batch, labels_batch
+
+iter_ = train_data_iterator()
+for step in range(100):
+    # get a batch of data
+    images_batch_val, labels_batch_val = next(iter_)
+    print(images_batch_val)
+    print(labels_batch_val)
