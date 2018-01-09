@@ -141,6 +141,12 @@ loss_mean = tf.reduce_mean(loss)
 # 지금까지 정의한 모든 노드들이 결국 어떤 값을 표현한다면 train_op 는 알고리즘(operation)을 표현한다.
 train_op = tf.train.AdamOptimizer().minimize(loss)
 
+y_normalized = tf.nn.softmax(y_pred)
+y_pred_labels = tf.cast(tf.argmax(y_normalized, 1), tf.int32)
+
+correct_prediction = tf.equal(y_pred_labels, labels_batch)
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 # 지금까지 구성한 그래프를 실행할 session을 생성하고 변수들을 초기화한다.
@@ -148,12 +154,12 @@ sess.run(tf.global_variables_initializer())
 iter_ = train_data_iterator()
 for step in range(500):
     images_batch_val, labels_batch_val = next(iter_)
-    _, loss_val = sess.run([train_op, loss_mean],       # 이렇게 실행할 타겟을 지정
+    _, loss_val, accuracy_val = sess.run([train_op, loss_mean, accuracy],       # 이렇게 실행할 타겟을 지정
                            feed_dict={                      # Python dictionary의 형태로 placeholder에 제공할 데이터 공급
                                images_batch:images_batch_val,
                                labels_batch:labels_batch_val
                            })
-    print(loss_val)
+    print(loss_val, accuracy_val)
 
 print('Training Finished....')
 
@@ -163,8 +169,9 @@ for i in range(int(len(test_features)/TEST_BSIZE)):
     images_batch_val = test_features[i*TEST_BSIZE:(i+1)*TEST_BSIZE] / 255.
     labels_batch_val = test_labels[i*TEST_BSIZE:(i+1)*TEST_BSIZE]
 
-    loss_val = sess.run([loss_mean], feed_dict={
+    loss_val, accuracy_val = sess.run([loss_mean, accuracy], feed_dict={
         images_batch:images_batch_val,
         labels_batch:labels_batch_val
     })
-    print(loss_val)
+
+    print(loss_val, accuracy_val)
