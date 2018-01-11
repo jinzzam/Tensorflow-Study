@@ -79,18 +79,22 @@ test_features = features[int(0.8 * len(features)):]
 test_labels = labels[int(0.8 * len(labels)):]
 
 
-def train_data_iterator():  # generator?
+def train_data_iterator():  # generator
     batch_idx = 0
     while True:
         # 매 시대마다 새로 shuffling 한다
-        idxs = np.arange(0, len(train_features))
+        idxs = np.arange(0, len(train_features))        # numpy array에서 arange(a, b) : a ~ b-1까지의 인덱스를 갖는 배열을 생성
         # np.arange(A, B) : 배열에 A이상 B미만 까지의 숫자를 순서대로 저장해줌
         np.random.shuffle(idxs)  # 인덱스 자체를 셔플
         shuf_features = train_features[idxs]
         shuf_labels = train_labels[idxs]
+        # 두 개를 동시에 셔플링한다. 단, 그 두 개는 동일하게
 
         batch_size = BATCH_SIZE  # 50
 
+        # range : 순수 Python이 제공하는 함수
+        # range(100) : 0~99까지의 인덱스를 갖는 리스트 생성
+        # range(a, b, c) : c는 step의 역할  a, a+c, a+2c ...
         for batch_idx in range(0, len(train_features), batch_size):  # array slicing
             images_batch = shuf_features[batch_idx:batch_idx + batch_size] / 255.  # 255로 나누어서 0에서 1사이의 실수로 정규화한다
             labels_batch = shuf_labels[batch_idx:batch_idx + batch_size]
@@ -100,10 +104,13 @@ def train_data_iterator():  # generator?
 iter_ = train_data_iterator()  # generator를 호출하면 iterator를 반환한다
 for step in range(100):
     # get a batch of data
-    images_batch_val, labels_batch_val = next(iter_)  # iterator에 대해서 next함수를 실행할 때마다 하나의 배치가 반환된다
+    images_batch_val, labels_batch_val = next(iter_)
+    # iterator에 대해서 next함수를 실행할 때마다 하나의 배치가 반환된다
+    # 지정된 크기의 배치가 next(iter_)에 의해 반환되어 각각의 변수에 저장됨
     print(images_batch_val)
     print(labels_batch_val)
 
+# === PLACEHOLDER ===
 # placeholder를 통해 네트워크에 이미지와 라벨 공급
 images_batch = tf.placeholder(dtype=tf.float32, shape=[None, IMG_HEIGHT * IMG_WIDTH * NUM_CHANNEL])
 # 입력 이미지가 제공될 placeholder의 크기는 batch_size*image_size 이다.
@@ -111,10 +118,13 @@ images_batch = tf.placeholder(dtype=tf.float32, shape=[None, IMG_HEIGHT * IMG_WI
 labels_batch = tf.placeholder(dtype=tf.int32, shape=[None, ])
 # 크기가 미정인 1차원 벡터의 shape은 이렇게 지정함 (이렇게하면 label이 one hot encoding이 아님)
 
+# ===MODEL VARIABLE===
 w1 = tf.get_variable("w1", [IMG_HEIGHT * IMG_WIDTH * NUM_CHANNEL, 1024])
 # weight 행렬의 크기는 '이전 레이어의 노드 개수 * 현재 레이어의 노드 개수'
 b1 = tf.get_variable("b1", [1024])
 
+# 일어나야할 계산들을 표현하는 노드들
+# === MODEL ===
 # Layer1의 출력 벡터
 fc1 = tf.nn.relu(tf.matmul(images_batch, w1) + b1)
 # images_batch * w1은 [batch_size, 1024]크기의 행렬이고 b1은 [1024]크기의 1차원 벡터이다.
@@ -128,7 +138,7 @@ fc2 = tf.nn.relu(tf.matmul(fc1, w2) + b2)
 
 w3 = tf.get_variable("w3", [512, NUM_CLASS])
 b3 = tf.get_variable("b3", [NUM_CLASS])
-y_pred = tf.matmul(fc2, w3) + b3
+y_pred = tf.matmul(fc2, w3) + b3        # tf.matmual(a, b) : a와 b의 행렬곱
 # 출력 레이어에는 아직 activation 함수를 적용하지 않았다.
 # y_pred는 임의의 실수를 원소로 가지는 batch_size * NUM_CLASS 크기의 행렬이다.
 
@@ -147,10 +157,14 @@ y_pred_labels = tf.cast(tf.argmax(y_normalized, 1), tf.int32)
 correct_prediction = tf.equal(y_pred_labels, labels_batch)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+# === SESSION 생성 === (실제 계산을 수행하는 프로세스)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 # 지금까지 구성한 그래프를 실행할 session을 생성하고 변수들을 초기화한다.
 
+
+# === placeholder에 입력 데이터를 제공하고
+# 내가 알고 싶은 값을 지정하면서 session을 run하면 계산 결과가 반환된다
 iter_ = train_data_iterator()
 for step in range(500):
     images_batch_val, labels_batch_val = next(iter_)
