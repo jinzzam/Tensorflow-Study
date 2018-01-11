@@ -113,19 +113,22 @@ for step in range(100):
 # === PLACEHOLDER ===
 # placeholder를 통해 네트워크에 이미지와 라벨 공급
 images_batch = tf.placeholder(dtype=tf.float32, shape=[None, IMG_HEIGHT * IMG_WIDTH * NUM_CHANNEL])
-# 입력 이미지가 제공될 placeholder의 크기는 batch_size*image_size 이다.
+# label은 1차원 배열인데 왜 shape에서 2차원 배열일까?
+# placeholder는 2차원 배열로 받는다.
+# 입력 이미지가 제공될 placeholder의 크기는 (이미지 개수)batch_size*image_size 이다.
+# 이미지를 한 장씩 주는 것이 아니라 한 뭉텅이(batch)만큼씩 준다.
 # None은 나중에 실제로 제공되는 데이터의 크기에 맞춘다는 의미
 labels_batch = tf.placeholder(dtype=tf.int32, shape=[None, ])
 # 크기가 미정인 1차원 벡터의 shape은 이렇게 지정함 (이렇게하면 label이 one hot encoding이 아님)
 
-# ===MODEL VARIABLE===
+# ===MODEL VARIABLE===             (이미지 개수     *     1024)
 w1 = tf.get_variable("w1", [IMG_HEIGHT * IMG_WIDTH * NUM_CHANNEL, 1024])
 # weight 행렬의 크기는 '이전 레이어의 노드 개수 * 현재 레이어의 노드 개수'
 b1 = tf.get_variable("b1", [1024])
 
 # 일어나야할 계산들을 표현하는 노드들
 # === MODEL ===
-# Layer1의 출력 벡터
+# Layer1의 출력 벡터 (50개의 벡터가 한 번에 나온 결과)
 fc1 = tf.nn.relu(tf.matmul(images_batch, w1) + b1)
 # images_batch * w1은 [batch_size, 1024]크기의 행렬이고 b1은 [1024]크기의 1차원 벡터이다.
 # 행렬의 각 행에 b1이 더해진다. 이것을 numpy에서는 broadcasting이라고 부른다.
@@ -135,26 +138,41 @@ b2 = tf.get_variable("b2", [512])
 
 # 이전 레이어의 출력(fc1)이 이 레이어의 입력이 된다.
 fc2 = tf.nn.relu(tf.matmul(fc1, w2) + b2)
+# relu() : activation 함수
 
+# output layer
 w3 = tf.get_variable("w3", [512, NUM_CLASS])
 b3 = tf.get_variable("b3", [NUM_CLASS])
 y_pred = tf.matmul(fc2, w3) + b3        # tf.matmual(a, b) : a와 b의 행렬곱
 # 출력 레이어에는 아직 activation 함수를 적용하지 않았다.
+# softmax 함수를 쓰기로 했다!!
 # y_pred는 임의의 실수를 원소로 가지는 batch_size * NUM_CLASS 크기의 행렬이다.
 
+# 출력노드를 하나의 스칼라 값으로 표현하는 것이 적절하지 않은 이유는?
+# 정답과 실제 판정의 오차
+# loss를 계산하기가 힘듦
+# classfication 문제에서는 one-hot-encoding을 사용
+# regression 문제(ex. 사람 얼굴 주고 몇살이냐 묻는 문제)에서는 스칼라 값으로 출력하게 함
+# 우리는 output layer에 5개의 노드를 만든다 - 5개의 실수값이 나옴
+
+# softmax 함수 : 합이 1이되고 각각은 0에서 1사이의 실수가 됨 그와 동시에 각각이 갖는 고유의 크기는 변하지 않는다.
 # y_pred는 아직 softmax 함수를 적용하기 전이고 labels_batch는 one hot encoding이 아니다.
+# y_pred는 [0.1, 0.2, 0.5, 0.3, 0.1]과 같은 형태로 실수화되어 있다.
+# softmax 함수를 통과하면 [0, 0, 1, 0, 0]과 같은 형태로 정수화하여 나올 것이다.
+# 이는 one-hot-encoding되지 않은 labels_batch와 충돌한다.
 # 이런 상황에서 필요한 모든 일을 대신 처리해주는 함수가 아래의 함수.
 loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y_pred, labels=labels_batch)
 loss_mean = tf.reduce_mean(loss)
 # 평균 loss 계산
 
-# 지금까지 정의한 모든 노드들이 결국 어떤 값을 표현한다면 train_op 는 알고리즘(operation)을 표현한다.
-train_op = tf.train.AdamOptimizer().minimize(loss)
+# 지금까지 정의한 모든 노드들이 결국 어떤 값을 표현한다면 train_op 는 (gradient decent)알고리즘(operation)을 표현한다.
+train_op = tf.train.AdamOptimizer().minimize(loss_mean)
 
 y_normalized = tf.nn.softmax(y_pred)
-y_pred_labels = tf.cast(tf.argmax(y_normalized, 1), tf.int32)
+y_pred_labels = tf.cast(tf.argmax(y_normalized, 1), tf.int32)   #tf.cast(x, dtype = '') : x(tensor)를 새로운 자료형으로 변환
+# tf.argmax() : 여러 벡터 값 중에서 가장 큰 값이 있는 위치의 인덱스를 반환
 
-correct_prediction = tf.equal(y_pred_labels, labels_batch)
+correct_prediction = tf.equal(y_pred_labels, labels_batch)      # 결과가 정답과 같으냐 다르냐
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # === SESSION 생성 === (실제 계산을 수행하는 프로세스)
@@ -173,6 +191,7 @@ for step in range(500):
                                images_batch:images_batch_val,
                                labels_batch:labels_batch_val
                            })
+                            # Python dictionary : key, value 쌍으로 묶여있는 것
     print(loss_val, accuracy_val)
 
 print('Training Finished....')
