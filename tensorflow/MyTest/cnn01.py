@@ -87,12 +87,11 @@ iter_ = train_data_iterator()  # generator를 호출하면 iterator를 반환한
 for step in range(100):
     # get a batch of data
     images_batch_val, labels_batch_val = next(iter_)  # iterator에 대해서 next함수를 실행할 때마다 하나의 배치가 반환된다
-    print(images_batch_val)
-    print(labels_batch_val)
+#    print(images_batch_val)
+#    print(labels_batch_val)
 
 
-
-
+# === Convolution Neural Network ===
 
 images_batch = tf.placeholder(dtype=tf.float32, shape=[None, IMG_HEIGHT*IMG_WIDTH*NUM_CHANNEL])
 x_image = tf.reshape(images_batch, [-1, IMG_HEIGHT, IMG_WIDTH, NUM_CHANNEL])
@@ -149,6 +148,8 @@ fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, w1)+b1)
 keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(fc1, keep_prob)
 
+
+# Output Layer
 w2 = tf.get_variable("w2", [1024, NUM_CLASS])
 b2 = tf.get_variable("b2", [NUM_CLASS])
 
@@ -160,10 +161,12 @@ correct_prediction = tf.equal(class_prediction, labels_batch)
 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+# Loss and Train_op
 loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y_pred, labels=labels_batch)
 loss_mean = tf.reduce_mean(loss)
 train_op = tf.train.AdamOptimizer().minimize(loss_mean)
 
+# Training
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
@@ -180,6 +183,7 @@ for step in range(500):
 
 print('Training Finished....')
 
+# Testing
 print('Test begins....')
 
 TEST_BSIZE = 50
