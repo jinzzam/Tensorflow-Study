@@ -118,7 +118,7 @@ images_batch = tf.placeholder(dtype=tf.float32, shape=[None, IMG_HEIGHT * IMG_WI
 # 입력 이미지가 제공될 placeholder의 크기는 (이미지 개수)batch_size*image_size 이다.
 # 이미지를 한 장씩 주는 것이 아니라 한 뭉텅이(batch)만큼씩 준다.
 # None은 나중에 실제로 제공되는 데이터의 크기에 맞춘다는 의미
-labels_batch = tf.placeholder(dtype=tf.int32, shape=[None, ])
+labels_batch = tf.placeholder(dtype=tf.int32, shape=[None])
 # 크기가 미정인 1차원 벡터의 shape은 이렇게 지정함 (이렇게하면 label이 one hot encoding이 아님)
 
 # ===MODEL VARIABLE===             (이미지 개수     *     1024)
@@ -192,7 +192,7 @@ for step in range(500):
                                labels_batch:labels_batch_val
                            })
                             # Python dictionary : key, value 쌍으로 묶여있는 것
-    print(loss_val, accuracy_val)
+    print('loss :', loss_val, 'acc :', accuracy_val)
 
 print('Training Finished....')
 
@@ -207,4 +207,4 @@ for i in range(int(len(test_features)/TEST_BSIZE)):
         labels_batch:labels_batch_val
     })
 
-    print(loss_val, accuracy_val)
+    print('loss :', loss_val, 'acc :', accuracy_val)
